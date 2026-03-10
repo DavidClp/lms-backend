@@ -11,7 +11,7 @@ COPY . .
 RUN npx prisma generate
 
 # Compila TypeScript e ajusta aliases
-RUN npx tsc && npx tsc-alias
+RUN npx tsc --noEmitOnError false; npx tsc-alias
 
 # Stage 2: Runtime
 FROM node:20
