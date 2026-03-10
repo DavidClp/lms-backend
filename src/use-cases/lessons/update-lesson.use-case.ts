@@ -16,6 +16,11 @@ const contentBlockSchema = z.discriminatedUnion('type', [
     options: z.array(z.object({ id: z.string(), text: z.string() })),
     correctOptionId: z.string(),
   }),
+  z.object({
+    type: z.literal('IMAGES'),
+    imageIds: z.array(z.string().uuid()),
+    caption: z.string().optional(),
+  }),
 ])
 
 const updateLessonSchema = z.object({
