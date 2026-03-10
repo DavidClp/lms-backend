@@ -16,11 +16,13 @@ export class LoginUseCase {
     const user = await this.userRepository.findByEmail(email)
 
     if (!user) {
+      console.log("sem user")
       throw new AppError('Credenciais inválidas', 401)
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password)
     if (!passwordMatch) {
+           console.log("senah errada")
       throw new AppError('Credenciais inválidas', 401)
     }
 
