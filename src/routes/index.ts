@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import authRoutes from './auth.routes'
 import moduleRoutes from './module.routes'
 import lessonRoutes from './lesson.routes'
@@ -12,5 +12,9 @@ router.use('/modules', moduleRoutes)
 router.use('/lessons', lessonRoutes)
 router.use('/users', userRoutes)
 router.use('/progress', progressRoutes)
+router.get('/ping', (_req: Request, res: Response) => {
+  res.json('PONG - V.0.1')
+})
+
 
 export default router
