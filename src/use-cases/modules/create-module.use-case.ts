@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { IModuleRepository, ModuleData } from '../../repositories/interfaces/IModuleRepository'
+import { IModuleRepository, ModuleData, CreateModuleDTO } from '../../repositories/interfaces/IModuleRepository'
 import { AppError } from '../../middlewares/error.middleware'
 
 const createModuleSchema = z.object({
@@ -18,6 +18,6 @@ export class CreateModuleUseCase {
     if (!parsed.success) {
       throw new AppError(parsed.error.errors[0].message, 400)
     }
-    return this.moduleRepository.create(parsed.data)
+    return this.moduleRepository.create(parsed.data as CreateModuleDTO)
   }
 }

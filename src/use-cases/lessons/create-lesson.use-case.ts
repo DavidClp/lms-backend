@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ILessonRepository, LessonData } from '../../repositories/interfaces/ILessonRepository'
+import { ILessonRepository, LessonData, CreateLessonDTO } from '../../repositories/interfaces/ILessonRepository'
 import { IModuleRepository } from '../../repositories/interfaces/IModuleRepository'
 import { AppError } from '../../middlewares/error.middleware'
 
@@ -41,6 +41,6 @@ export class CreateLessonUseCase {
     const module = await this.moduleRepository.findById(parsed.data.moduleId)
     if (!module) throw new AppError('Módulo não encontrado', 404)
 
-    return this.lessonRepository.create(parsed.data)
+    return this.lessonRepository.create(parsed.data as CreateLessonDTO)
   }
 }

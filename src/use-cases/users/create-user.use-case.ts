@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { IUserRepository, SafeUser } from '../../repositories/interfaces/IUserRepository'
+import { IUserRepository, SafeUser, CreateUserDTO } from '../../repositories/interfaces/IUserRepository'
 import { AppError } from '../../middlewares/error.middleware'
 
 const createUserSchema = z.object({
@@ -21,6 +21,6 @@ export class CreateUserUseCase {
     const existing = await this.userRepository.findByEmail(parsed.data.email)
     if (existing) throw new AppError('Email já cadastrado', 409)
 
-    return this.userRepository.create(parsed.data)
+    return this.userRepository.create(parsed.data as CreateUserDTO)
   }
 }
