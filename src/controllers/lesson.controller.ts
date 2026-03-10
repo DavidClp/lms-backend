@@ -1,0 +1,67 @@
+import { Request, Response, NextFunction } from 'express'
+import { ListLessonsUseCase } from '../use-cases/lessons/list-lessons.use-case'
+import { ListLessonsByModuleUseCase } from '../use-cases/lessons/list-lessons-by-module.use-case'
+import { GetLessonUseCase } from '../use-cases/lessons/get-lesson.use-case'
+import { CreateLessonUseCase } from '../use-cases/lessons/create-lesson.use-case'
+import { UpdateLessonUseCase } from '../use-cases/lessons/update-lesson.use-case'
+import { DeleteLessonUseCase } from '../use-cases/lessons/delete-lesson.use-case'
+import { lessonRepository, moduleRepository } from '../repositories'
+
+export const lessonController = {
+  async list(_req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const lessons = await new ListLessonsUseCase(lessonRepository).execute()
+      res.json(lessons)
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  async listByModule(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const lessons = await new ListLessonsByModuleUseCase(
+        lessonRepository,
+        moduleRepository,
+      ).execute(req.params.id)
+      res.json(lessons)
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const lesson = await new GetLessonUseCase(lessonRepository).execute(req.params.id)
+      res.json(lesson)
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  async create(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const lesson = await new CreateLessonUseCase(lessonRepository, moduleRepository).execute(req.body)
+      res.status(201).json(lesson)
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  async update(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const lesson = await new UpdateLessonUseCase(lessonRepository).execute(req.params.id, req.body)
+      res.json(lesson)
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  async delete(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      await new DeleteLessonUseCase(lessonRepository).execute(req.params.id)
+      res.status(204).send()
+    } catch (e) {
+      next(e)
+    }
+  },
+}
