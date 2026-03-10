@@ -9,7 +9,6 @@ RUN npm install
 COPY . .
 
 RUN npx prisma generate
-RUN npm run db:seed
 
 # Compila TypeScript e ajusta aliases
 RUN npx tsc && npx tsc-alias
@@ -22,10 +21,11 @@ WORKDIR /app
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/prisma ./prisma
 
 ENV NODE_ENV=production
 ENV PORT=3001
 
 EXPOSE 3001
 
-CMD ["node", "build/shared/infra/http/express/server.js"]
+CMD ["sh", "-c", "npx prisma db seed && node build/shared/infra/http/express/server.js"]
