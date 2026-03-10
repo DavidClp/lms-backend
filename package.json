@@ -8,13 +8,10 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "db:generate": "prisma generate",
-		"db:push": "prisma db push && prisma generate",
-		"db:pull": "prisma db pull && prisma generate",
-    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push && prisma generate",
+    "db:pull": "prisma db pull && prisma generate",
     "db:seed": "tsx prisma/seed.ts",
-    "db:studio": "prisma studio", 
-    
-    "db:reset": "prisma migrate reset"  
+    "db:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

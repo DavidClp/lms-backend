@@ -7,6 +7,7 @@ export class AppError extends Error {
     public readonly message: string,
     public readonly statusCode: number = 400,
   ) {
+    console.log("ERROR", message)
     super(message)
     this.name = 'AppError'
   }
