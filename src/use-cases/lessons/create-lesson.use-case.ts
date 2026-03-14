@@ -5,7 +5,7 @@ import { AppError } from '../../middlewares/error.middleware'
 
 const contentBlockSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('TEXT'), value: z.string() }),
-  z.object({ type: z.literal('VIDEO'), url: z.string().url() }),
+  z.object({ type: z.literal('VIDEO'), url: z.string().url(), title: z.string().optional() }),
   z.object({
     type: z.literal('ACTIVITY_CHECKLIST'),
     items: z.array(z.string()),
@@ -13,14 +13,21 @@ const contentBlockSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('QUIZ'),
-    question: z.string(),
-    options: z.array(z.object({ id: z.string(), text: z.string() })),
-    correctOptionId: z.string(),
+    questions: z.array(z.object({
+      id: z.string(),
+      question: z.string(),
+      options: z.array(z.object({ id: z.string(), text: z.string() })),
+      correctOptionId: z.string(),
+    })),
   }),
   z.object({
     type: z.literal('IMAGES'),
     imageIds: z.array(z.string().uuid()),
     caption: z.string().optional(),
+  }),
+  z.object({
+    type: z.literal('OPEN_QUESTION'),
+    question: z.string(),
   }),
 ])
 

@@ -51,9 +51,10 @@ export function errorHandler(
     return
   }
 
-  // Prisma: erro de validação interna
+  // Prisma: erro de validação interna (ex: tipo incorreto para campo Json)
   if (err instanceof Prisma.PrismaClientValidationError) {
-    res.status(400).json({ error: 'Dados inválidos para o banco de dados' })
+    const msg = isDev ? err.message : 'Dados inválidos para o banco de dados'
+    res.status(400).json({ error: msg })
     return
   }
 

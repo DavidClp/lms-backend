@@ -80,14 +80,19 @@ async function main() {
         },
         {
           type: 'QUIZ',
-          question: 'O que é um computador?',
-          options: [
-            { id: '1', text: 'Um eletrodoméstico' },
-            { id: '2', text: 'Uma máquina que processa dados' },
-            { id: '3', text: 'Um tipo de telefone' },
-            { id: '4', text: 'Uma calculadora grande' },
+          questions: [
+            {
+              id: 'q1',
+              question: 'O que é um computador?',
+              options: [
+                { id: '1', text: 'Um eletrodoméstico' },
+                { id: '2', text: 'Uma máquina que processa dados' },
+                { id: '3', text: 'Um tipo de telefone' },
+                { id: '4', text: 'Uma calculadora grande' },
+              ],
+              correctOptionId: '2',
+            },
           ],
-          correctOptionId: '2',
         },
       ],
     },
@@ -114,14 +119,19 @@ async function main() {
         },
         {
           type: 'QUIZ',
-          question: 'Qual componente é responsável pelo processamento dos dados?',
-          options: [
-            { id: '1', text: 'Monitor' },
-            { id: '2', text: 'Teclado' },
-            { id: '3', text: 'CPU' },
-            { id: '4', text: 'Mouse' },
+          questions: [
+            {
+              id: 'q1',
+              question: 'Qual componente é responsável pelo processamento dos dados?',
+              options: [
+                { id: '1', text: 'Monitor' },
+                { id: '2', text: 'Teclado' },
+                { id: '3', text: 'CPU' },
+                { id: '4', text: 'Mouse' },
+              ],
+              correctOptionId: '3',
+            },
           ],
-          correctOptionId: '3',
         },
       ],
     },
@@ -167,14 +177,19 @@ async function main() {
         },
         {
           type: 'QUIZ',
-          question: 'O que é a internet?',
-          options: [
-            { id: '1', text: 'Um programa de computador' },
-            { id: '2', text: 'Uma rede mundial de computadores' },
-            { id: '3', text: 'Um tipo de cabo elétrico' },
-            { id: '4', text: 'Um sistema operacional' },
+          questions: [
+            {
+              id: 'q1',
+              question: 'O que é a internet?',
+              options: [
+                { id: '1', text: 'Um programa de computador' },
+                { id: '2', text: 'Uma rede mundial de computadores' },
+                { id: '3', text: 'Um tipo de cabo elétrico' },
+                { id: '4', text: 'Um sistema operacional' },
+              ],
+              correctOptionId: '2',
+            },
           ],
-          correctOptionId: '2',
         },
       ],
     },
@@ -255,14 +270,19 @@ async function main() {
         },
         {
           type: 'QUIZ',
-          question: 'Qual atalho de teclado aplica o negrito no texto?',
-          options: [
-            { id: '1', text: 'Ctrl+N' },
-            { id: '2', text: 'Ctrl+B' },
-            { id: '3', text: 'Ctrl+G' },
-            { id: '4', text: 'Alt+B' },
+          questions: [
+            {
+              id: 'q1',
+              question: 'Qual atalho de teclado aplica o negrito no texto?',
+              options: [
+                { id: '1', text: 'Ctrl+N' },
+                { id: '2', text: 'Ctrl+B' },
+                { id: '3', text: 'Ctrl+G' },
+                { id: '4', text: 'Alt+B' },
+              ],
+              correctOptionId: '2',
+            },
           ],
-          correctOptionId: '2',
         },
       ],
     },

@@ -5,7 +5,8 @@ import { GetLessonUseCase } from '../use-cases/lessons/get-lesson.use-case'
 import { CreateLessonUseCase } from '../use-cases/lessons/create-lesson.use-case'
 import { UpdateLessonUseCase } from '../use-cases/lessons/update-lesson.use-case'
 import { DeleteLessonUseCase } from '../use-cases/lessons/delete-lesson.use-case'
-import { lessonRepository, moduleRepository } from '../repositories'
+import { GetLessonQuizResultsUseCase } from '../use-cases/progress/get-lesson-quiz-results.use-case'
+import { lessonRepository, moduleRepository, progressRepository } from '../repositories'
 
 export const lessonController = {
   async list(_req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -60,6 +61,18 @@ export const lessonController = {
     try {
       await new DeleteLessonUseCase(lessonRepository).execute(req.params.id)
       res.status(204).send()
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  async getQuizResults(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const result = await new GetLessonQuizResultsUseCase(
+        progressRepository,
+        lessonRepository
+      ).execute(req.params.id)
+      res.json(result)
     } catch (e) {
       next(e)
     }

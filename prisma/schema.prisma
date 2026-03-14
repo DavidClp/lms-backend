@@ -63,14 +63,16 @@ model Image {
 }
 
 model Progress {
-  id          String    @id @default(uuid())
-  userId      String    @map("user_id")
-  lessonId    String    @map("lesson_id")
-  completed   Boolean   @default(false)
-  completedAt DateTime? @map("completed_at")
-  createdAt   DateTime  @default(now()) @map("created_at")
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  id                   String    @id @default(uuid())
+  userId               String    @map("user_id")
+  lessonId             String    @map("lesson_id")
+  completed            Boolean   @default(false)
+  completedAt          DateTime? @map("completed_at")
+  quizResults          Json?     @map("quiz_results")
+  openQuestionAnswers  Json?     @map("open_question_answers")
+  createdAt            DateTime  @default(now()) @map("created_at")
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson               Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
   @@map("progress")
