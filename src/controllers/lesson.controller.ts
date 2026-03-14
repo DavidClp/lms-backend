@@ -6,7 +6,7 @@ import { CreateLessonUseCase } from '../use-cases/lessons/create-lesson.use-case
 import { UpdateLessonUseCase } from '../use-cases/lessons/update-lesson.use-case'
 import { DeleteLessonUseCase } from '../use-cases/lessons/delete-lesson.use-case'
 import { GetLessonQuizResultsUseCase } from '../use-cases/progress/get-lesson-quiz-results.use-case'
-import { lessonRepository, moduleRepository, progressRepository } from '../repositories'
+import { lessonRepository, moduleRepository, progressRepository, studentModuleAccessRepository } from '../repositories'
 
 export const lessonController = {
   async list(_req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -20,10 +20,12 @@ export const lessonController = {
 
   async listByModule(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const auth = req.user ? { userId: req.user.id, role: req.user.role } : undefined
       const lessons = await new ListLessonsByModuleUseCase(
         lessonRepository,
         moduleRepository,
-      ).execute(req.params.id)
+        studentModuleAccessRepository,
+      ).execute(req.params.id, auth)
       res.json(lessons)
     } catch (e) {
       next(e)
@@ -32,7 +34,8 @@ export const lessonController = {
 
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const lesson = await new GetLessonUseCase(lessonRepository).execute(req.params.id)
+      const auth = req.user ? { userId: req.user.id, role: req.user.role } : undefined
+      const lesson = await new GetLessonUseCase(lessonRepository, studentModuleAccessRepository).execute(req.params.id, auth)
       res.json(lesson)
     } catch (e) {
       next(e)

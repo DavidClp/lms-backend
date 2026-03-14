@@ -6,6 +6,8 @@ import { requireRole } from '../middlewares/role.middleware'
 const router = Router()
 
 router.get('/', authenticate, requireRole('ADMIN'), userController.list)
+router.get('/:id/module-access', authenticate, userController.getModuleAccess)
+router.put('/:id/module-access', authenticate, requireRole('ADMIN'), userController.updateModuleAccess)
 router.get('/:id', authenticate, userController.getById)
 router.post('/', authenticate, requireRole('ADMIN'), userController.create)
 router.put('/:id', authenticate, userController.update)

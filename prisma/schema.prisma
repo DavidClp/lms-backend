@@ -13,28 +13,41 @@ enum Role {
 }
 
 model User {
-  id        String     @id @default(uuid())
-  name      String
-  email     String     @unique
-  password  String
-  role      Role       @default(STUDENT)
-  createdAt DateTime   @default(now()) @map("created_at")
-  updatedAt DateTime   @updatedAt @map("updated_at")
-  progress  Progress[]
+  id            String                 @id @default(uuid())
+  name          String
+  email         String                 @unique
+  password      String
+  role          Role                   @default(STUDENT)
+  createdAt     DateTime               @default(now()) @map("created_at")
+  updatedAt     DateTime               @updatedAt @map("updated_at")
+  progress      Progress[]
+  moduleAccess  StudentModuleAccess[]
 
   @@map("users")
 }
 
 model Module {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  order       Int      @map("order")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-  lessons     Lesson[]
+  id             String                 @id @default(uuid())
+  title          String
+  description    String?
+  order          Int                    @map("order")
+  createdAt      DateTime               @default(now()) @map("created_at")
+  updatedAt      DateTime               @updatedAt @map("updated_at")
+  lessons        Lesson[]
+  studentAccess  StudentModuleAccess[]
 
   @@map("modules")
+}
+
+model StudentModuleAccess {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  moduleId  String   @map("module_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleId])
+  @@map("student_module_access")
 }
 
 model Lesson {
