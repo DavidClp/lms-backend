@@ -25,6 +25,7 @@ export class SaveQuizResultsUseCase {
       userId,
       parsed.data.lessonId,
       parsed.data.blockIndex,
+      // @ts-ignore
       parsed.data.results
     )
   }
