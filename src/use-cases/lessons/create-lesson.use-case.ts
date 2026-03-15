@@ -25,8 +25,8 @@ const contentBlockSchema = z.discriminatedUnion('type', [
     images: z.array(z.object({
       id: z.string().uuid(),
       caption: z.string().optional(),
-      width: z.number().min(0).max(100).optional(),
-      height: z.number().min(0).max(100).optional(),
+      width: z.number().int().positive().optional(),
+      height: z.number().int().positive().optional(),
     })),
   }),
   z.object({
