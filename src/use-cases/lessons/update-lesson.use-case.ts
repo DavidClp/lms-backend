@@ -1,6 +1,21 @@
 import { z } from 'zod'
 import { ILessonRepository, LessonData } from '../../repositories/interfaces/ILessonRepository'
+import { IImageRepository } from '../../repositories/interfaces/IImageRepository'
 import { AppError } from '../../middlewares/error.middleware'
+
+function getImageIdsFromContent(content: unknown[]): string[] {
+  const ids: string[] = []
+  for (const block of content) {
+    if (typeof block !== 'object' || block === null) continue
+    const b = block as { type?: string; images?: { id?: string }[] }
+    if (b.type === 'IMAGES' && Array.isArray(b.images)) {
+      for (const img of b.images) {
+        if (typeof img?.id === 'string') ids.push(img.id)
+      }
+    }
+  }
+  return ids
+}
 
 const contentBlockSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('TEXT'), value: z.string() }),
@@ -43,7 +58,10 @@ const updateLessonSchema = z.object({
 })
 
 export class UpdateLessonUseCase {
-  constructor(private readonly lessonRepository: ILessonRepository) {}
+  constructor(
+    private readonly lessonRepository: ILessonRepository,
+    private readonly imageRepository: IImageRepository,
+  ) {}
 
   async execute(id: string, input: unknown): Promise<LessonData> {
     const existing = await this.lessonRepository.findById(id)
@@ -54,6 +72,29 @@ export class UpdateLessonUseCase {
       throw new AppError(parsed.error.errors[0].message, 400)
     }
 
-    return this.lessonRepository.update(id, parsed.data)
+    const updated = await this.lessonRepository.update(id, parsed.data)
+
+    if (parsed.data.content !== undefined) {
+      const oldContent = (existing.content || []) as unknown[]
+      const newContent = (parsed.data.content || []) as unknown[]
+      const oldIds = getImageIdsFromContent(oldContent)
+      const newIdsSet = new Set(getImageIdsFromContent(newContent))
+      const removedIds = oldIds.filter((imageId) => !newIdsSet.has(imageId))
+      if (removedIds.length > 0) {
+        const allLessons = await this.lessonRepository.findAll()
+        const stillUsed = new Set<string>()
+        for (const lesson of allLessons) {
+          const content = lesson.id === id ? newContent : (lesson.content || []) as unknown[]
+          getImageIdsFromContent(content).forEach((imageId) => stillUsed.add(imageId))
+        }
+        for (const imageId of removedIds) {
+          if (!stillUsed.has(imageId)) {
+            await this.imageRepository.deleteById(imageId).catch(() => {})
+          }
+        }
+      }
+    }
+
+    return updated
   }
 }
