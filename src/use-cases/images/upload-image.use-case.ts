@@ -2,7 +2,7 @@ import sharp from 'sharp'
 import { IImageRepository, ImageData } from '../../repositories/interfaces/IImageRepository'
 import { AppError } from '../../middlewares/error.middleware'
 
-const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff']
+const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/avif']
 const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10 MB
 const WEBP_QUALITY = 75
 

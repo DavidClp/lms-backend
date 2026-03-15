@@ -43,6 +43,7 @@ const contentBlockSchema = z.discriminatedUnion('type', [
       height: z.number().int().positive().optional(),
     })),
     cardWithBorder: z.boolean().optional(),
+    imageLayout: z.enum(['column', 'row']).optional(),
   }),
   z.object({
     type: z.literal('OPEN_QUESTION'),

@@ -7,6 +7,29 @@ import {
   OpenQuestionAnswersByBlock,
 } from '../interfaces/IProgressRepository'
 
+type QuizResultItem = { questionId: string; correct: boolean }
+
+/** Converte formato armazenado (única tentativa ou array de tentativas) para última tentativa apenas. */
+function getLatestQuizResults(raw: unknown): QuizResultsByBlock {
+  if (!raw || typeof raw !== 'object') return {}
+  const out: QuizResultsByBlock = {}
+  for (const [key, value] of Object.entries(raw)) {
+    if (!Array.isArray(value) || value.length === 0) continue
+    const isHistoryFormat = Array.isArray(value[0]) && typeof value[0][0] === 'object'
+    out[key] = isHistoryFormat ? (value[value.length - 1] as QuizResultItem[]) : (value as QuizResultItem[])
+  }
+  return out
+}
+
+/** Retorna array de tentativas para um bloco (formato interno). */
+function getAttemptsForBlock(raw: unknown, blockKey: string): QuizResultItem[][] {
+  if (!raw || typeof raw !== 'object') return []
+  const value = (raw as Record<string, unknown>)[blockKey]
+  if (!Array.isArray(value) || value.length === 0) return []
+  const isHistoryFormat = Array.isArray(value[0]) && value[0].length > 0 && typeof value[0][0] === 'object'
+  return isHistoryFormat ? (value as QuizResultItem[][]) : [value as QuizResultItem[]]
+}
+
 export class PrismaProgressRepository implements IProgressRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
@@ -31,7 +54,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       lessonId: r.lessonId,
       completed: r.completed,
       completedAt: r.completedAt,
-      quizResults: (r.quizResults as QuizResultsByBlock) ?? undefined,
+      quizResults: getLatestQuizResults(r.quizResults) ?? undefined,
       openQuestionAnswers: (r.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
       createdAt: r.createdAt,
       lesson: {
@@ -68,7 +91,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       lessonId: r.lessonId,
       completed: r.completed,
       completedAt: r.completedAt,
-      quizResults: (r.quizResults as QuizResultsByBlock) ?? undefined,
+      quizResults: getLatestQuizResults(r.quizResults) ?? undefined,
       openQuestionAnswers: (r.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
       createdAt: r.createdAt,
       user: r.user,
@@ -93,7 +116,7 @@ export class PrismaProgressRepository implements IProgressRepository {
 
     return {
       ...record,
-      quizResults: (record.quizResults as QuizResultsByBlock) ?? undefined,
+      quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
     }
   }
@@ -108,21 +131,21 @@ export class PrismaProgressRepository implements IProgressRepository {
     const existing = await this.prisma.progress.findUnique({
       where: { userId_lessonId: { userId, lessonId } },
     })
-    const currentQuiz = (existing?.quizResults as QuizResultsByBlock) ?? {}
-    const alreadyAnswered = Array.isArray(currentQuiz[key]) && currentQuiz[key].length > 0
-    const nextQuiz: QuizResultsByBlock = alreadyAnswered
-      ? currentQuiz
-      : { ...currentQuiz, [key]: results }
+    const raw = existing?.quizResults ?? {}
+    const attempts = getAttemptsForBlock(raw, key)
+    const nextAttempts = [...attempts, results]
+    const nextQuiz = { ...(raw as Record<string, unknown>), [key]: nextAttempts }
+    const jsonValue = JSON.parse(JSON.stringify(nextQuiz)) as Prisma.InputJsonValue
 
     const record = await this.prisma.progress.upsert({
       where: { userId_lessonId: { userId, lessonId } },
-      create: { userId, lessonId, completed: false, quizResults: nextQuiz },
-      update: { quizResults: nextQuiz },
+      create: { userId, lessonId, completed: false, quizResults: jsonValue },
+      update: { quizResults: jsonValue },
     })
 
     return {
       ...record,
-      quizResults: (record.quizResults as QuizResultsByBlock) ?? undefined,
+      quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
     }
   }
@@ -149,7 +172,7 @@ export class PrismaProgressRepository implements IProgressRepository {
 
     return {
       ...record,
-      quizResults: (record.quizResults as QuizResultsByBlock) ?? undefined,
+      quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
     }
   }
