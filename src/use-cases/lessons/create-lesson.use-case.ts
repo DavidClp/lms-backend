@@ -22,8 +22,12 @@ const contentBlockSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('IMAGES'),
-    imageIds: z.array(z.string().uuid()),
-    caption: z.string().optional(),
+    images: z.array(z.object({
+      id: z.string().uuid(),
+      caption: z.string().optional(),
+      width: z.number().min(0).max(100).optional(),
+      height: z.number().min(0).max(100).optional(),
+    })),
   }),
   z.object({
     type: z.literal('OPEN_QUESTION'),
