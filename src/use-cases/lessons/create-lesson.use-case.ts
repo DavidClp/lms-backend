@@ -6,6 +6,7 @@ import { AppError } from '../../middlewares/error.middleware'
 const contentBlockSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('TEXT'), value: z.string() }),
   z.object({ type: z.literal('VIDEO'), url: z.string().url(), title: z.string().optional() }),
+  z.object({ type: z.literal('IFRAME'), url: z.string().url(), title: z.string().optional() }),
   z.object({
     type: z.literal('ACTIVITY_CHECKLIST'),
     items: z.array(z.string()),
