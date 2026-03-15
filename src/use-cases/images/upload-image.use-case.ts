@@ -24,22 +24,29 @@ export class UploadImageUseCase {
       throw new AppError('Arquivo muito grande. Tamanho máximo: 10 MB.', 400)
     }
 
-    console.log("BBBBBB")
-    const webpBuffer = await sharp(file.buffer)
-      .webp({ quality: WEBP_QUALITY })
-      .toBuffer()
-
+    const isGif = file.mimetype === 'image/gif'
+    let data: Buffer
+    let mimeType: string
+    let fileName: string
     const baseName = file.originalname.replace(/\.[^.]+$/, '')
-    const fileName = `${baseName}.webp`
 
-    console.log("webpBuffer",webpBuffer )
-    console.log("fileName", fileName)
-    console.log(" webpBuffer.length",  webpBuffer.length)
+    if (isGif) {
+      data = file.buffer
+      mimeType = 'image/gif'
+      fileName = `${baseName}.gif`
+    } else {
+      data = await sharp(file.buffer)
+        .webp({ quality: WEBP_QUALITY })
+        .toBuffer()
+      mimeType = 'image/webp'
+      fileName = `${baseName}.webp`
+    }
+
     return this.imageRepository.create({
-      data: webpBuffer,
-      mimeType: 'image/webp',
+      data,
+      mimeType,
       fileName,
-      size: webpBuffer.length,
+      size: data.length,
     })
   }
 }
