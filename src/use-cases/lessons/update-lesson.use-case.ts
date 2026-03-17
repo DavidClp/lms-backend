@@ -20,7 +20,7 @@ function getImageIdsFromContent(content: unknown[]): string[] {
 const contentBlockSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('TEXT'), value: z.string() }),
   z.object({ type: z.literal('VIDEO'), url: z.string(), title: z.string().optional(), isGoogleDrive: z.boolean().optional() }),
-  z.object({ type: z.literal('IFRAME'), url: z.string().min(1, 'URL do iframe é obrigatória'), title: z.string().optional() }),
+  z.object({ type: z.literal('IFRAME'), url: z.string(), title: z.string().optional(), googleDocId: z.string().optional() }),
   z.object({
     type: z.literal('ACTIVITY_CHECKLIST'),
     items: z.array(z.string()),
