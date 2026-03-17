@@ -3,8 +3,8 @@ import { IImageRepository, ImageData } from '../../repositories/interfaces/IImag
 import { AppError } from '../../middlewares/error.middleware'
 
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/bmp', 'image/tiff', 'image/avif']
-const MAX_SIZE_BYTES = 10 * 1024 * 1024 // 10 MB
-const WEBP_QUALITY = 75
+const MAX_SIZE_BYTES = 50 * 1024 * 1024 // 50 MB
+const WEBP_QUALITY = 100
 
 export interface UploadImageInput {
   buffer: Buffer

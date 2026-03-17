@@ -7,6 +7,7 @@ import { UpdateLessonUseCase } from '../use-cases/lessons/update-lesson.use-case
 import { DeleteLessonUseCase } from '../use-cases/lessons/delete-lesson.use-case'
 import { GetLessonQuizResultsUseCase } from '../use-cases/progress/get-lesson-quiz-results.use-case'
 import { lessonRepository, moduleRepository, progressRepository, studentModuleAccessRepository, imageRepository } from '../repositories'
+import { parseMarkdownLesson } from '../services/markdown-lesson-parser'
 
 export const lessonController = {
   async list(_req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -76,6 +77,33 @@ export const lessonController = {
         lessonRepository
       ).execute(req.params.id)
       res.json(result)
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  async importFromMarkdown(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { moduleId, order, markdown, title: customTitle } = req.body as {
+        moduleId: string
+        order: number
+        markdown: string
+        title?: string
+      }
+      if (!moduleId || typeof markdown !== 'string' || markdown.trim() === '') {
+        res.status(400).json({ message: 'moduleId e markdown são obrigatórios' })
+        return
+      }
+      const parsed = parseMarkdownLesson(markdown)
+      const title = customTitle?.trim() || parsed.title
+      const orderNum = typeof order === 'number' ? order : parseInt(String(order), 10) || 1
+      const lesson = await new CreateLessonUseCase(lessonRepository, moduleRepository).execute({
+        moduleId,
+        title,
+        order: orderNum,
+        content: parsed.content,
+      })
+      res.status(201).json(lesson)
     } catch (e) {
       next(e)
     }

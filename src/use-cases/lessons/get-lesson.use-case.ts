@@ -18,6 +18,9 @@ export class GetLessonUseCase {
       if (!allowedModuleIds.includes(lesson.moduleId)) {
         throw new AppError('Acesso negado a esta aula', 403)
       }
+      if (!lesson.isActive) {
+        throw new AppError('Aula não encontrada', 404)
+      }
     }
     return lesson
   }

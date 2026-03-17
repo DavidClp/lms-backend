@@ -48,6 +48,7 @@ export class PrismaLessonRepository implements ILessonRepository {
         title: data.title,
         order: data.order,
         content: (data.content ?? []) as object[],
+        isActive: data.isActive ?? true,
       },
     })
     return { ...lesson, content: lesson.content as unknown[] }
@@ -59,6 +60,7 @@ export class PrismaLessonRepository implements ILessonRepository {
     if (data.order !== undefined) updateData.order = data.order
     if (data.content !== undefined) updateData.content = data.content as object[]
     if (data.moduleId !== undefined) updateData.moduleId = data.moduleId
+    if (data.isActive !== undefined) updateData.isActive = data.isActive
 
     const lesson = await this.prisma.lesson.update({
       where: { id },

@@ -4,6 +4,7 @@ export interface LessonData {
   title: string
   order: number
   content: unknown[]
+  isActive: boolean
   createdAt: Date
   updatedAt: Date
 }
@@ -21,6 +22,7 @@ export interface CreateLessonDTO {
   title: string
   order: number
   content?: unknown[]
+  isActive?: boolean
 }
 
 export interface UpdateLessonDTO {
@@ -28,6 +30,7 @@ export interface UpdateLessonDTO {
   order?: number
   content?: unknown[]
   moduleId?: string
+  isActive?: boolean
 }
 
 export interface ILessonRepository {

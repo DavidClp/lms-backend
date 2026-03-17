@@ -9,6 +9,7 @@ router.get('/', authenticate, lessonController.list)
 router.get('/:id/quiz-results', authenticate, requireRole('ADMIN'), lessonController.getQuizResults)
 router.get('/:id', authenticate, lessonController.getById)
 router.post('/', authenticate, requireRole('ADMIN'), lessonController.create)
+router.post('/import', authenticate, requireRole('ADMIN'), lessonController.importFromMarkdown)
 router.put('/:id', authenticate, requireRole('ADMIN'), lessonController.update)
 router.delete('/:id', authenticate, requireRole('ADMIN'), lessonController.delete)
 

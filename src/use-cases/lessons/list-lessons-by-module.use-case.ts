@@ -21,6 +21,10 @@ export class ListLessonsByModuleUseCase {
         throw new AppError('Acesso negado a este módulo', 403)
       }
     }
-    return this.lessonRepository.findByModuleId(moduleId)
+    const lessons = await this.lessonRepository.findByModuleId(moduleId)
+    if (auth?.role === 'STUDENT') {
+      return lessons.filter((l) => l.isActive)
+    }
+    return lessons
   }
 }

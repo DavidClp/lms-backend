@@ -5,7 +5,7 @@ import { AppError } from '../../middlewares/error.middleware'
 
 const contentBlockSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('TEXT'), value: z.string() }),
-  z.object({ type: z.literal('VIDEO'), url: z.string().url(), title: z.string().optional() }),
+  z.object({ type: z.literal('VIDEO'), url: z.string(), title: z.string().optional() }),
   z.object({ type: z.literal('IFRAME'), url: z.string().min(1, 'URL do iframe é obrigatória'), title: z.string().optional() }),
   z.object({
     type: z.literal('ACTIVITY_CHECKLIST'),
@@ -43,6 +43,7 @@ const createLessonSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
   order: z.number().int().positive('Ordem deve ser um número positivo'),
   content: z.array(contentBlockSchema).default([]),
+  isActive: z.boolean().optional(),
 })
 
 export class CreateLessonUseCase {
