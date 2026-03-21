@@ -19,6 +19,22 @@ export const progressController = {
     }
   },
 
+  async getUserProgressForAdmin(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user) {
+        throw new AppError('Não autenticado', 401)
+      }
+      const { userId } = req.params
+      if (!userId) {
+        throw new AppError('ID do aluno inválido', 400)
+      }
+      const progress = await new GetUserProgressUseCase(progressRepository).execute(userId)
+      res.json(progress)
+    } catch (e) {
+      next(e)
+    }
+  },
+
   async toggleProgress(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       if (!req.user) {
