@@ -10,7 +10,7 @@ const BLOCK_HEADER_REGEX = /^# ✦ BLOCO \d+ — ([^\n]+)/gm
 const IMAGEM_PLACEHOLDER_REGEX = />?\s*💡?\s*\*?\[IMAGEM:\s*([^\]]*)\]\s*\*?\s*/gi
 
 type TextBlock = { type: 'TEXT'; value: string }
-type VideoBlock = { type: 'VIDEO'; url: string; title?: string }
+type VideoBlock = { type: 'VIDEO'; url: string; title?: string; startSeconds?: number }
 type ActivityChecklistBlock = { type: 'ACTIVITY_CHECKLIST'; title?: string; items: string[] }
 type ImagesBlock = {
   type: 'IMAGES'
