@@ -25,6 +25,7 @@ const contentBlockSchema = z.discriminatedUnion('type', [
     title: z.string().optional(),
     isGoogleDrive: z.boolean().optional(),
     startSeconds: z.number().int().min(0).optional(),
+    endSeconds: z.number().int().min(0).optional(),
   }),
   z.object({ type: z.literal('IFRAME'), url: z.string(), title: z.string().optional(), googleDocId: z.string().optional() }),
   z.object({
