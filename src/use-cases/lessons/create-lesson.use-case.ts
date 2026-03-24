@@ -43,6 +43,12 @@ const contentBlockSchema = z.discriminatedUnion('type', [
     type: z.literal('OPEN_QUESTION'),
     question: z.string(),
   }),
+  z.object({
+    type: z.literal('TABLE'),
+    caption: z.string().optional(),
+    headers: z.array(z.string()),
+    rows: z.array(z.array(z.string())),
+  }),
 ])
 
 const createLessonSchema = z.object({

@@ -28,6 +28,7 @@ type QuizBlock = {
   }>
 }
 type OpenQuestionBlock = { type: 'OPEN_QUESTION'; question: string }
+type TableBlock = { type: 'TABLE'; caption?: string; headers: string[]; rows: string[][] }
 
 export type ParsedContentBlock =
   | TextBlock
@@ -36,6 +37,7 @@ export type ParsedContentBlock =
   | ImagesBlock
   | QuizBlock
   | OpenQuestionBlock
+  | TableBlock
 
 export interface ParsedLesson {
   title: string
@@ -117,6 +119,7 @@ function getBlockType(headerLine: string): string {
   if (normalized.includes('CHECKLIST')) return 'ACTIVITY_CHECKLIST'
   if (normalized.includes('QUIZ')) return 'QUIZ'
   if (normalized.includes('PERGUNTA ABERTA')) return 'OPEN_QUESTION'
+  if (normalized.includes('TABELA')) return 'TABLE'
   return 'TEXT'
 }
 
@@ -183,6 +186,32 @@ function parseQuizBlock(body: string): QuizBlock['questions'] {
   return questions
 }
 
+/** Parseia linhas tipo | c1 | c2 | (markdown) em cabeçalho + linhas; ignora linha |---|---| */
+function parseMarkdownPipeTable(body: string): { headers: string[]; rows: string[][] } | null {
+  const lines = body
+    .split('\n')
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && l.includes('|'))
+  if (lines.length === 0) return null
+  const parseRow = (line: string): string[] => {
+    const trimmed = line.trim()
+    const parts = trimmed.split('|').map((c) => c.trim())
+    if (parts[0] === '') parts.shift()
+    if (parts.length > 0 && parts[parts.length - 1] === '') parts.pop()
+    return parts
+  }
+  const rowsParsed = lines.map(parseRow).filter((cells) => cells.length > 0)
+  const isSeparator = (cells: string[]) =>
+    cells.length > 0 &&
+    cells.every((c) => !c || (/^[\s:-]+$/.test(c) && c.replace(/[\s:-]/g, '').length === 0))
+  const dataRows = rowsParsed.filter((cells) => !isSeparator(cells))
+  if (dataRows.length === 0) return null
+  const headers = dataRows[0]
+  const rest = dataRows.slice(1)
+  const rows = rest.length > 0 ? rest : [headers.map(() => '')]
+  return { headers, rows }
+}
+
 /** Extrai a pergunta do bloco PERGUNTA ABERTA (geralmente um parágrafo em negrito ou a primeira pergunta) */
 function parseOpenQuestion(body: string): string {
   const boldMatch = body.match(/\*\*([^*]+)\*\*/)
@@ -229,6 +258,20 @@ function parseBlock(headerLine: string, body: string): ParsedContentBlock[] {
       type: 'OPEN_QUESTION',
       question: parseOpenQuestion(body),
     }]
+  }
+
+  if (type === 'TABLE') {
+    const parsed = parseMarkdownPipeTable(body)
+    const titleMatch = body.match(/^##\s+(.+?)(?:\n|$)/m)
+    if (parsed) {
+      return [{
+        type: 'TABLE',
+        caption: titleMatch ? titleMatch[1].trim() : undefined,
+        headers: parsed.headers,
+        rows: parsed.rows,
+      }]
+    }
+    return [{ type: 'TEXT', value: markdownToHtml(bodyTrimmed) }]
   }
 
   // Blocos de texto: extrair [IMAGEM: ...] e gerar bloco IMAGES quando houver
