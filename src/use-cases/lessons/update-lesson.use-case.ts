@@ -63,11 +63,17 @@ const contentBlockSchema = z.discriminatedUnion('type', [
     headers: z.array(z.string()),
     rows: z.array(z.array(z.string())),
   }),
+  z.object({
+    type: z.literal('PDF'),
+    src: z.string().min(1),
+    title: z.string().optional(),
+  }),
 ])
 
 const updateLessonSchema = z.object({
   title: z.string().min(1).optional(),
   order: z.number().int().positive().optional(),
+  kind: z.enum(['LESSON', 'EXAM']).optional(),
   content: z.array(contentBlockSchema).optional(),
   moduleId: z.string().uuid().optional(),
   isActive: z.boolean().optional(),

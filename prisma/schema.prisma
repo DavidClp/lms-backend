@@ -12,6 +12,11 @@ enum Role {
   STUDENT
 }
 
+enum LessonKind {
+  LESSON
+  EXAM
+}
+
 model User {
   id            String                 @id @default(uuid())
   name          String
@@ -55,6 +60,7 @@ model Lesson {
   moduleId  String     @map("module_id")
   title     String
   order     Int        @map("order")
+  kind      LessonKind @default(LESSON) @map("kind")
   content   Json       @default("[]")
   isActive  Boolean    @default(true) @map("is_active")
   createdAt DateTime   @default(now()) @map("created_at")

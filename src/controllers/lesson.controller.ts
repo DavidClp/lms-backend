@@ -22,11 +22,13 @@ export const lessonController = {
   async listByModule(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const auth = req.user ? { userId: req.user.id, role: req.user.role } : undefined
+      const kindRaw = typeof req.query.kind === 'string' ? req.query.kind : undefined
+      const kind = kindRaw === 'LESSON' || kindRaw === 'EXAM' ? kindRaw : undefined
       const lessons = await new ListLessonsByModuleUseCase(
         lessonRepository,
         moduleRepository,
         studentModuleAccessRepository,
-      ).execute(req.params.id, auth)
+      ).execute(req.params.id, auth, kind)
       res.json(lessons)
     } catch (e) {
       next(e)

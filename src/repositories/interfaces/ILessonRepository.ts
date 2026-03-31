@@ -3,6 +3,7 @@ export interface LessonData {
   moduleId: string
   title: string
   order: number
+  kind: 'LESSON' | 'EXAM'
   content: unknown[]
   isActive: boolean
   createdAt: Date
@@ -21,6 +22,7 @@ export interface CreateLessonDTO {
   moduleId: string
   title: string
   order: number
+  kind?: 'LESSON' | 'EXAM'
   content?: unknown[]
   isActive?: boolean
 }
@@ -28,6 +30,7 @@ export interface CreateLessonDTO {
 export interface UpdateLessonDTO {
   title?: string
   order?: number
+  kind?: 'LESSON' | 'EXAM'
   content?: unknown[]
   moduleId?: string
   isActive?: boolean

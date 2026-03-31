@@ -4,6 +4,7 @@ import { IStudentModuleAccessRepository } from '../../repositories/interfaces/IS
 import { AppError } from '../../middlewares/error.middleware'
 
 type AuthContext = { userId: string; role: string }
+type LessonKind = 'LESSON' | 'EXAM'
 
 export class ListLessonsByModuleUseCase {
   constructor(
@@ -12,7 +13,7 @@ export class ListLessonsByModuleUseCase {
     private readonly studentModuleAccessRepository: IStudentModuleAccessRepository,
   ) {}
 
-  async execute(moduleId: string, auth?: AuthContext): Promise<LessonData[]> {
+  async execute(moduleId: string, auth?: AuthContext, kind?: LessonKind): Promise<LessonData[]> {
     const module = await this.moduleRepository.findById(moduleId)
     if (!module) throw new AppError('Módulo não encontrado', 404)
     if (auth?.role === 'STUDENT') {
@@ -22,9 +23,10 @@ export class ListLessonsByModuleUseCase {
       }
     }
     const lessons = await this.lessonRepository.findByModuleId(moduleId)
+    const filteredByKind = kind ? lessons.filter((l) => l.kind === kind) : lessons
     if (auth?.role === 'STUDENT') {
-      return lessons.filter((l) => l.isActive)
+      return filteredByKind.filter((l) => l.isActive)
     }
-    return lessons
+    return filteredByKind
   }
 }

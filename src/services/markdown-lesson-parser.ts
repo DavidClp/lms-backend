@@ -29,6 +29,7 @@ type QuizBlock = {
 }
 type OpenQuestionBlock = { type: 'OPEN_QUESTION'; question: string }
 type TableBlock = { type: 'TABLE'; caption?: string; headers: string[]; rows: string[][] }
+type PdfBlock = { type: 'PDF'; src: string; title?: string }
 
 export type ParsedContentBlock =
   | TextBlock
@@ -38,6 +39,7 @@ export type ParsedContentBlock =
   | QuizBlock
   | OpenQuestionBlock
   | TableBlock
+  | PdfBlock
 
 export interface ParsedLesson {
   title: string
@@ -120,6 +122,7 @@ function getBlockType(headerLine: string): string {
   if (normalized.includes('QUIZ')) return 'QUIZ'
   if (normalized.includes('PERGUNTA ABERTA')) return 'OPEN_QUESTION'
   if (normalized.includes('TABELA')) return 'TABLE'
+  if (normalized.includes('PDF')) return 'PDF'
   return 'TEXT'
 }
 
@@ -212,6 +215,22 @@ function parseMarkdownPipeTable(body: string): { headers: string[]; rows: string
   return { headers, rows }
 }
 
+/** Extrai caminho do PDF e título opcional (## título + linha com /lesson-pdfs/... ou [PDF: ...]) */
+function parsePdfBlock(body: string): { src: string; title?: string } {
+  const titleMatch = body.match(/^##\s+(.+?)(?:\n|$)/m)
+  const bracket = body.match(/\[PDF:\s*([^\]]+)\]/i)
+  const pathLine =
+    bracket?.[1]?.trim() ||
+    body.match(/(\/[^\s]+\.pdf)/i)?.[1] ||
+    body.match(/src:\s*(\S+)/i)?.[1] ||
+    ''
+  const src = pathLine.startsWith('/') ? pathLine : pathLine ? `/${pathLine}` : '/lesson-pdfs/'
+  return {
+    src,
+    title: titleMatch ? titleMatch[1].trim() : undefined,
+  }
+}
+
 /** Extrai a pergunta do bloco PERGUNTA ABERTA (geralmente um parágrafo em negrito ou a primeira pergunta) */
 function parseOpenQuestion(body: string): string {
   const boldMatch = body.match(/\*\*([^*]+)\*\*/)
@@ -272,6 +291,11 @@ function parseBlock(headerLine: string, body: string): ParsedContentBlock[] {
       }]
     }
     return [{ type: 'TEXT', value: markdownToHtml(bodyTrimmed) }]
+  }
+
+  if (type === 'PDF') {
+    const { src, title } = parsePdfBlock(body)
+    return [{ type: 'PDF', src, title }]
   }
 
   // Blocos de texto: extrair [IMAGEM: ...] e gerar bloco IMAGES quando houver
