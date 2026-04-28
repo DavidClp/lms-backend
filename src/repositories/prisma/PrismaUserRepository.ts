@@ -78,6 +78,11 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async delete(id: string): Promise<void> {
-    await this.prisma.user.delete({ where: { id } })
+    await this.prisma.$transaction(async (tx) => {
+      // Defensive cleanup in case DB constraints were created without ON DELETE CASCADE.
+      await tx.studentModuleAccess.deleteMany({ where: { userId: id } })
+      await tx.progress.deleteMany({ where: { userId: id } })
+      await tx.user.delete({ where: { id } })
+    })
   }
 }
