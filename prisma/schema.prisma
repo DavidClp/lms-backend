@@ -106,3 +106,14 @@ model PlatformConfig {
 
   @@map("platform_config")
 }
+
+
+model casamento_confirmacao {
+  id String @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+  quantidade_pessoas Int @map("quantidade_convidados")
+  nome String @map("nome")
+  observacao String? @map("observacoes")
+
+  @@map("casamento_confirmacao")
+}
