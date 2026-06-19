@@ -1,8 +1,16 @@
+export type ProfileMode = 'ADULT' | 'KIDS'
+
 export interface SafeUser {
   id: string
   name: string
   email: string
   role: 'ADMIN' | 'STUDENT'
+  profileMode: ProfileMode
+  totalXp: number
+  level: number
+  avatarConfig: Record<string, string> | null
+  currentStreak: number
+  lastActivityDate: Date | null
   createdAt: Date
   updatedAt: Date
 }
@@ -16,6 +24,7 @@ export interface CreateUserDTO {
   email: string
   password: string
   role?: 'ADMIN' | 'STUDENT'
+  profileMode?: ProfileMode
 }
 
 export interface UpdateUserDTO {
@@ -23,6 +32,8 @@ export interface UpdateUserDTO {
   email?: string
   password?: string
   role?: 'ADMIN' | 'STUDENT'
+  profileMode?: ProfileMode
+  avatarConfig?: Record<string, string>
 }
 
 export interface IUserRepository {

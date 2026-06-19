@@ -6,6 +6,7 @@ import { PrismaProgressRepository } from './prisma/PrismaProgressRepository'
 import { PrismaImageRepository } from './prisma/PrismaImageRepository'
 import { PrismaStudentModuleAccessRepository } from './prisma/PrismaStudentModuleAccessRepository'
 import { PrismaPlatformConfigRepository } from './prisma/PrismaPlatformConfigRepository'
+import { PrismaGamificationRepository } from './prisma/PrismaGamificationRepository'
 
 export const userRepository = new PrismaUserRepository(prisma)
 export const moduleRepository = new PrismaModuleRepository(prisma)
@@ -14,3 +15,4 @@ export const progressRepository = new PrismaProgressRepository(prisma)
 export const imageRepository = new PrismaImageRepository(prisma)
 export const studentModuleAccessRepository = new PrismaStudentModuleAccessRepository(prisma)
 export const platformConfigRepository = new PrismaPlatformConfigRepository(prisma)
+export const gamificationRepository = new PrismaGamificationRepository(prisma)

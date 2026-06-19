@@ -12,44 +12,71 @@ enum Role {
   STUDENT
 }
 
+enum ProfileMode {
+  ADULT
+  KIDS
+}
+
+enum ModuleAudience {
+  ADULT
+  KIDS
+  ALL
+}
+
 enum LessonKind {
   LESSON
   EXAM
 }
 
+enum DailyMissionType {
+  LOGIN
+  COMPLETE_LESSON
+  QUIZ_CORRECT
+}
+
 model User {
-  id            String                 @id @default(uuid())
-  name          String
-  email         String                 @unique
-  password      String
-  role          Role                   @default(STUDENT)
-  createdAt     DateTime               @default(now()) @map("created_at")
-  updatedAt     DateTime               @updatedAt @map("updated_at")
-  progress      Progress[]
-  moduleAccess  StudentModuleAccess[]
+  id               String                 @id @default(uuid())
+  name             String
+  email            String                 @unique
+  password         String
+  role             Role                   @default(STUDENT)
+  profileMode      ProfileMode            @default(ADULT) @map("profile_mode")
+  totalXp          Int                    @default(0) @map("total_xp")
+  level            Int                    @default(1)
+  avatarConfig     Json?                  @map("avatar_config")
+  currentStreak    Int                    @default(0) @map("current_streak")
+  lastActivityDate DateTime?              @map("last_activity_date")
+  createdAt        DateTime               @default(now()) @map("created_at")
+  updatedAt        DateTime               @updatedAt @map("updated_at")
+  progress         Progress[]
+  moduleAccess     StudentModuleAccess[]
+  badges           UserBadge[]
+  dailyMissions    DailyMission[]
 
   @@map("users")
 }
 
 model Module {
-  id             String                 @id @default(uuid())
-  title          String
-  description    String?
-  order          Int                    @map("order")
-  createdAt      DateTime               @default(now()) @map("created_at")
-  updatedAt      DateTime               @updatedAt @map("updated_at")
-  lessons        Lesson[]
-  studentAccess  StudentModuleAccess[]
+  id            String                 @id @default(uuid())
+  title         String
+  description   String?
+  order         Int                    @map("order")
+  audience      ModuleAudience         @default(ADULT)
+  kidsMeta      Json?                  @map("kids_meta")
+  createdAt     DateTime               @default(now()) @map("created_at")
+  updatedAt     DateTime               @updatedAt @map("updated_at")
+  lessons       Lesson[]
+  studentAccess StudentModuleAccess[]
 
   @@map("modules")
 }
 
 model StudentModuleAccess {
-  id        String   @id @default(uuid())
-  userId    String   @map("user_id")
-  moduleId  String   @map("module_id")
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  module    Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  userId   String @map("user_id")
+  moduleId String @map("module_id")
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   @@unique([userId, moduleId])
   @@map("student_module_access")
@@ -83,19 +110,61 @@ model Image {
 }
 
 model Progress {
-  id                   String    @id @default(uuid())
-  userId               String    @map("user_id")
-  lessonId             String    @map("lesson_id")
-  completed            Boolean   @default(false)
-  completedAt          DateTime? @map("completed_at")
-  quizResults          Json?     @map("quiz_results")
-  openQuestionAnswers  Json?     @map("open_question_answers")
-  createdAt            DateTime  @default(now()) @map("created_at")
-  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lesson               Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  lessonId            String    @map("lesson_id")
+  completed           Boolean   @default(false)
+  completedAt         DateTime? @map("completed_at")
+  quizResults         Json?     @map("quiz_results")
+  openQuestionAnswers Json?     @map("open_question_answers")
+  checklistState      Json?     @map("checklist_state")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson              Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
   @@map("progress")
+}
+
+model Badge {
+  id          String      @id @default(uuid())
+  slug        String      @unique
+  name        String
+  description String
+  iconEmoji   String      @default("🏅") @map("icon_emoji")
+  xpReward    Int         @default(0) @map("xp_reward")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  users       UserBadge[]
+
+  @@map("badges")
+}
+
+model UserBadge {
+  id       String   @id @default(uuid())
+  userId   String   @map("user_id")
+  badgeId  String   @map("badge_id")
+  earnedAt DateTime @default(now()) @map("earned_at")
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@map("user_badges")
+}
+
+model DailyMission {
+  id        String           @id @default(uuid())
+  userId    String           @map("user_id")
+  date      DateTime         @db.Date
+  type      DailyMissionType
+  target    Int              @default(1)
+  progress  Int              @default(0)
+  completed Boolean          @default(false)
+  xpReward  Int              @default(0) @map("xp_reward")
+  createdAt DateTime         @default(now()) @map("created_at")
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date, type])
+  @@map("daily_missions")
 }
 
 model PlatformConfig {
@@ -107,13 +176,12 @@ model PlatformConfig {
   @@map("platform_config")
 }
 
-
 model casamento_confirmacao {
-  id String @id @default(uuid())
-  createdAt DateTime @default(now()) @map("created_at")
-  quantidade_pessoas Int @map("quantidade_convidados")
-  nome String @map("nome")
-  observacao String? @map("observacoes")
+  id                 String   @id @default(uuid())
+  createdAt          DateTime @default(now()) @map("created_at")
+  quantidade_pessoas Int      @map("quantidade_convidados")
+  nome               String   @map("nome")
+  observacao         String?  @map("observacoes")
 
   @@map("casamento_confirmacao")
 }

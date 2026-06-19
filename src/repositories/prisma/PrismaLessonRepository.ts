@@ -6,18 +6,23 @@ import {
   CreateLessonDTO,
   UpdateLessonDTO,
 } from '../interfaces/ILessonRepository'
+import type { ModuleAudience } from '../interfaces/IModuleRepository'
 
 const moduleSelect = {
   id: true,
   title: true,
   order: true,
+  audience: true,
 }
 
 export class PrismaLessonRepository implements ILessonRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async findAll(): Promise<LessonWithModule[]> {
+  async findAll(audienceFilter?: ModuleAudience[]): Promise<LessonWithModule[]> {
     const lessons = await this.prisma.lesson.findMany({
+      where: audienceFilter?.length
+        ? { module: { audience: { in: audienceFilter } } }
+        : undefined,
       include: { module: { select: moduleSelect } },
       orderBy: [{ module: { order: 'asc' } }, { order: 'asc' }],
     })

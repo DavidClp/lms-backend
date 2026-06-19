@@ -5,6 +5,7 @@ import {
   ProgressWithDetails,
   QuizResultsByBlock,
   OpenQuestionAnswersByBlock,
+  ChecklistStateByBlock,
 } from '../interfaces/IProgressRepository'
 
 type QuizResultItem = { questionId: string; correct: boolean }
@@ -56,6 +57,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       completedAt: r.completedAt,
       quizResults: getLatestQuizResults(r.quizResults) ?? undefined,
       openQuestionAnswers: (r.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
+      checklistState: (r.checklistState as ChecklistStateByBlock) ?? undefined,
       createdAt: r.createdAt,
       lesson: {
         id: r.lesson.id,
@@ -93,6 +95,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       completedAt: r.completedAt,
       quizResults: getLatestQuizResults(r.quizResults) ?? undefined,
       openQuestionAnswers: (r.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
+      checklistState: (r.checklistState as ChecklistStateByBlock) ?? undefined,
       createdAt: r.createdAt,
       user: r.user,
       lesson: {
@@ -118,6 +121,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       ...record,
       quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
+      checklistState: (record.checklistState as ChecklistStateByBlock) ?? undefined,
     }
   }
 
@@ -147,6 +151,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       ...record,
       quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
+      checklistState: (record.checklistState as ChecklistStateByBlock) ?? undefined,
     }
   }
 
@@ -174,6 +179,35 @@ export class PrismaProgressRepository implements IProgressRepository {
       ...record,
       quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
+      checklistState: (record.checklistState as ChecklistStateByBlock) ?? undefined,
+    }
+  }
+
+  async updateChecklistState(
+    userId: string,
+    lessonId: string,
+    blockIndex: number,
+    checked: boolean[]
+  ): Promise<ProgressData> {
+    const key = String(blockIndex)
+    const existing = await this.prisma.progress.findUnique({
+      where: { userId_lessonId: { userId, lessonId } },
+    })
+    const current = (existing?.checklistState as ChecklistStateByBlock) ?? {}
+    const next: ChecklistStateByBlock = { ...current, [key]: checked }
+    const jsonValue = JSON.parse(JSON.stringify(next)) as Prisma.InputJsonValue
+
+    const record = await this.prisma.progress.upsert({
+      where: { userId_lessonId: { userId, lessonId } },
+      create: { userId, lessonId, completed: false, checklistState: jsonValue },
+      update: { checklistState: jsonValue },
+    })
+
+    return {
+      ...record,
+      quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
+      openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
+      checklistState: (record.checklistState as ChecklistStateByBlock) ?? undefined,
     }
   }
 }

@@ -6,6 +6,14 @@ const updateModuleSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional(),
   order: z.number().int().positive().optional(),
+  audience: z.enum(['ADULT', 'KIDS', 'ALL']).optional(),
+  kidsMeta: z
+    .object({
+      worldIcon: z.string().optional(),
+      worldColor: z.string().optional(),
+      mascotIntro: z.string().optional(),
+    })
+    .optional(),
 })
 
 export class UpdateModuleUseCase {

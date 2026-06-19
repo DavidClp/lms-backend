@@ -3,6 +3,9 @@ export type QuizResultsByBlock = Record<string, { questionId: string; correct: b
 /** Por bloco (índice): resposta em texto do aluno */
 export type OpenQuestionAnswersByBlock = Record<string, string>
 
+/** Por bloco (índice): estado dos checkboxes */
+export type ChecklistStateByBlock = Record<string, boolean[]>
+
 export interface ProgressData {
   id: string
   userId: string
@@ -11,6 +14,7 @@ export interface ProgressData {
   completedAt: Date | null
   quizResults?: QuizResultsByBlock | null
   openQuestionAnswers?: OpenQuestionAnswersByBlock | null
+  checklistState?: ChecklistStateByBlock | null
   createdAt: Date
 }
 
@@ -43,5 +47,11 @@ export interface IProgressRepository {
     lessonId: string,
     blockIndex: number,
     answer: string
+  ): Promise<ProgressData>
+  updateChecklistState(
+    userId: string,
+    lessonId: string,
+    blockIndex: number,
+    checked: boolean[]
   ): Promise<ProgressData>
 }

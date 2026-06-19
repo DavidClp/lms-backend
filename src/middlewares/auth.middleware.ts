@@ -5,6 +5,7 @@ import { env } from '../config/env'
 interface JwtPayload {
   sub: string
   role: 'ADMIN' | 'STUDENT'
+  profileMode?: 'ADULT' | 'KIDS'
 }
 
 export function authenticate(req: Request, res: Response, next: NextFunction): void {
@@ -19,7 +20,11 @@ export function authenticate(req: Request, res: Response, next: NextFunction): v
 
   try {
     const payload = jwt.verify(token, env.JWT_SECRET) as JwtPayload
-    req.user = { id: payload.sub, role: payload.role }
+    req.user = {
+      id: payload.sub,
+      role: payload.role,
+      profileMode: payload.profileMode ?? 'ADULT',
+    }
     next()
   } catch {
     res.status(401).json({ error: 'Token inválido ou expirado' })

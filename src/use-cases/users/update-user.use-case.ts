@@ -7,6 +7,8 @@ const updateUserSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(6).optional(),
   role: z.enum(['ADMIN', 'STUDENT']).optional(),
+  profileMode: z.enum(['ADULT', 'KIDS']).optional(),
+  avatarConfig: z.record(z.string()).optional(),
 })
 
 export class UpdateUserUseCase {

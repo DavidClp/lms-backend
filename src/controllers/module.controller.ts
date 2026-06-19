@@ -7,9 +7,13 @@ import { DeleteModuleUseCase } from '../use-cases/modules/delete-module.use-case
 import { moduleRepository } from '../repositories'
 
 export const moduleController = {
-  async list(_req: Request, res: Response, next: NextFunction): Promise<void> {
+  async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const modules = await new ListModulesUseCase(moduleRepository).execute()
+      const profileMode = req.user?.role === 'STUDENT' ? req.user.profileMode : undefined
+      const modules = await new ListModulesUseCase(moduleRepository).execute(
+        profileMode,
+        req.user?.role,
+      )
       res.json(modules)
     } catch (e) {
       next(e)

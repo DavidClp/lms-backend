@@ -6,6 +6,14 @@ const createModuleSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
   description: z.string().optional(),
   order: z.number().int().positive('Ordem deve ser um número positivo'),
+  audience: z.enum(['ADULT', 'KIDS', 'ALL']).optional(),
+  kidsMeta: z
+    .object({
+      worldIcon: z.string().optional(),
+      worldColor: z.string().optional(),
+      mascotIntro: z.string().optional(),
+    })
+    .optional(),
 })
 
 export type CreateModuleInput = z.infer<typeof createModuleSchema>

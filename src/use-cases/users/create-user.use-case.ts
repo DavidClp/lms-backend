@@ -7,6 +7,7 @@ const createUserSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   role: z.enum(['ADMIN', 'STUDENT']).optional(),
+  profileMode: z.enum(['ADULT', 'KIDS']).optional(),
 })
 
 export class CreateUserUseCase {

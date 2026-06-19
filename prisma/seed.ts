@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client'
+import { PrismaClient, Role, ProfileMode, ModuleAudience } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
@@ -7,6 +7,9 @@ async function main() {
   console.log('Seeding database...')
 
   // Clear all data in correct order
+  await prisma.dailyMission.deleteMany()
+  await prisma.userBadge.deleteMany()
+  await prisma.badge.deleteMany()
   await prisma.progress.deleteMany()
   await prisma.lesson.deleteMany()
   await prisma.module.deleteMany()
@@ -31,10 +34,32 @@ async function main() {
       email: 'aluno@lms.com',
       password: studentPassword,
       role: Role.STUDENT,
+      profileMode: ProfileMode.ADULT,
     },
   })
 
-  console.log('Users created:', admin.email, student.email)
+  const kidsStudent = await prisma.user.create({
+    data: {
+      name: 'Maria Kids',
+      email: 'kids@lms.com',
+      password: studentPassword,
+      role: Role.STUDENT,
+      profileMode: ProfileMode.KIDS,
+      avatarConfig: { skin: 'peach', hair: 'brown', accessory: 'star', background: 'sky' },
+    },
+  })
+
+  console.log('Users created:', admin.email, student.email, kidsStudent.email)
+
+  await prisma.badge.createMany({
+    data: [
+      { slug: 'first-mission', name: 'Primeira Aventura', description: 'Complete sua primeira missão', iconEmoji: '🚀', xpReward: 25 },
+      { slug: 'quiz-star', name: 'Estrela do Quiz', description: 'Acerte 5 quizzes completos', iconEmoji: '⭐', xpReward: 50 },
+      { slug: 'world-complete', name: 'Conquistador', description: 'Complete um mundo inteiro', iconEmoji: '🏝️', xpReward: 100 },
+      { slug: 'streak-7', name: 'Fogo de 7 Dias', description: 'Entre 7 dias seguidos', iconEmoji: '🔥', xpReward: 75 },
+      { slug: 'helper', name: 'Ajudante', description: 'Complete uma lista de tarefas', iconEmoji: '🤝', xpReward: 20 },
+    ],
+  })
 
   // Create modules
   const module1 = await prisma.module.create({
@@ -42,6 +67,7 @@ async function main() {
       title: 'Introdução à Informática',
       description: 'Conceitos básicos sobre computadores e tecnologia',
       order: 1,
+      audience: ModuleAudience.ADULT,
     },
   })
 
@@ -50,6 +76,7 @@ async function main() {
       title: 'Navegação na Internet',
       description: 'Como usar navegadores e acessar a internet com segurança',
       order: 2,
+      audience: ModuleAudience.ADULT,
     },
   })
 
@@ -58,6 +85,35 @@ async function main() {
       title: 'Editor de Texto',
       description: 'Aprenda a criar e editar documentos de texto',
       order: 3,
+      audience: ModuleAudience.ADULT,
+    },
+  })
+
+  const kidsModule1 = await prisma.module.create({
+    data: {
+      title: 'Mundo do Teclado',
+      description: 'Descubra as teclas mágicas do computador',
+      order: 1,
+      audience: ModuleAudience.KIDS,
+      kidsMeta: {
+        worldIcon: '⌨️',
+        worldColor: '#4F46E5',
+        mascotIntro: 'Vamos descobrir as teclas juntos!',
+      },
+    },
+  })
+
+  const kidsModule2 = await prisma.module.create({
+    data: {
+      title: 'Mundo do Mouse',
+      description: 'Aprenda a mover e clicar como um pro',
+      order: 2,
+      audience: ModuleAudience.KIDS,
+      kidsMeta: {
+        worldIcon: '🖱️',
+        worldColor: '#EC4899',
+        mascotIntro: 'Hora de dominar o mouse!',
+      },
     },
   })
 
@@ -320,10 +376,107 @@ async function main() {
   })
 
   console.log('Progress records created')
+
+  await prisma.lesson.createMany({
+    data: [
+      {
+        moduleId: kidsModule1.id,
+        title: 'Missão 1: Conheça o Teclado',
+        order: 1,
+        content: [
+          { type: 'TEXT', value: '<p>Olá, explorador! Hoje vamos conhecer o teclado do computador.</p><p>Ele tem muitas teclas especiais!</p>' },
+          { type: 'VIDEO', url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', title: 'O teclado mágico' },
+          {
+            type: 'QUIZ',
+            questions: [
+              {
+                id: 'k1',
+                question: 'Para que serve o teclado?',
+                options: [
+                  { id: '1', text: 'Digitar' },
+                  { id: '2', text: 'Imprimir' },
+                  { id: '3', text: 'Cozinhar' },
+                ],
+                correctOptionId: '1',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        moduleId: kidsModule1.id,
+        title: 'Missão 2: A Tecla Enter',
+        order: 2,
+        content: [
+          { type: 'TEXT', value: '<p>A tecla Enter confirma o que você escreveu. Procure ela no teclado!</p>' },
+          {
+            type: 'ACTIVITY_CHECKLIST',
+            title: 'Caça ao Tesouro',
+            items: ['Ache a tecla Enter', 'Pressione Enter uma vez', 'Veja o que acontece'],
+          },
+          {
+            type: 'QUIZ',
+            questions: [
+              {
+                id: 'k2',
+                question: 'Qual tecla confirma o texto?',
+                options: [
+                  { id: '1', text: 'Enter' },
+                  { id: '2', text: 'Esc' },
+                  { id: '3', text: 'F12' },
+                ],
+                correctOptionId: '1',
+              },
+            ],
+          },
+        ],
+      },
+      {
+        moduleId: kidsModule2.id,
+        title: 'Missão 1: Mover o Mouse',
+        order: 1,
+        content: [
+          { type: 'TEXT', value: '<p>O mouse ajuda você a apontar coisas na tela. Mova devagar!</p>' },
+          {
+            type: 'ACTIVITY_CHECKLIST',
+            items: ['Mova o mouse para cima', 'Mova para baixo', 'Clique uma vez'],
+          },
+          {
+            type: 'QUIZ',
+            questions: [
+              {
+                id: 'k3',
+                question: 'O que fazemos com o mouse?',
+                options: [
+                  { id: '1', text: 'Apontar e clicar' },
+                  { id: '2', text: 'Digitar letras' },
+                  { id: '3', text: 'Ligar o PC' },
+                ],
+                correctOptionId: '1',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  })
+
+  const allModules = [module1, module2, module3]
+  const kidsModules = [kidsModule1, kidsModule2]
+
+  await prisma.studentModuleAccess.createMany({
+    data: [
+      ...allModules.map((m) => ({ userId: student.id, moduleId: m.id })),
+      ...kidsModules.map((m) => ({ userId: kidsStudent.id, moduleId: m.id })),
+    ],
+  })
+
+  console.log('Kids lessons and module access created')
   console.log('Seeding completed!')
   console.log('\nTest credentials:')
   console.log('Admin: admin@lms.com / admin123')
   console.log('Student: aluno@lms.com / aluno123')
+  console.log('Kids: kids@lms.com / aluno123')
 }
 
 main()

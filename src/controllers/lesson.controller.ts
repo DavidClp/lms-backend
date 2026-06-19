@@ -10,9 +10,12 @@ import { lessonRepository, moduleRepository, progressRepository, studentModuleAc
 import { parseMarkdownLesson } from '../services/markdown-lesson-parser'
 
 export const lessonController = {
-  async list(_req: Request, res: Response, next: NextFunction): Promise<void> {
+  async list(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const lessons = await new ListLessonsUseCase(lessonRepository).execute()
+      const lessons = await new ListLessonsUseCase(lessonRepository).execute({
+        profileMode: req.user?.profileMode,
+        role: req.user?.role,
+      })
       res.json(lessons)
     } catch (e) {
       next(e)

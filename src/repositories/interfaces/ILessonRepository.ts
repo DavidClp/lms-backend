@@ -1,3 +1,5 @@
+import type { ModuleAudience } from './IModuleRepository'
+
 export interface LessonData {
   id: string
   moduleId: string
@@ -15,6 +17,7 @@ export interface LessonWithModule extends LessonData {
     id: string
     title: string
     order: number
+    audience?: 'ADULT' | 'KIDS' | 'ALL'
   }
 }
 
@@ -37,7 +40,7 @@ export interface UpdateLessonDTO {
 }
 
 export interface ILessonRepository {
-  findAll(): Promise<LessonWithModule[]>
+  findAll(audienceFilter?: ModuleAudience[]): Promise<LessonWithModule[]>
   findById(id: string): Promise<LessonWithModule | null>
   findByModuleId(moduleId: string): Promise<LessonData[]>
   create(data: CreateLessonDTO): Promise<LessonData>

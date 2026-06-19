@@ -4,6 +4,7 @@ declare global {
       user?: {
         id: string
         role: 'ADMIN' | 'STUDENT'
+        profileMode: 'ADULT' | 'KIDS'
       }
     }
   }

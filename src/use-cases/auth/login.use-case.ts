@@ -37,7 +37,7 @@ export class LoginUseCase {
     }
 
     const token = jwt.sign(
-      { sub: user.id, role: user.role },
+      { sub: user.id, role: user.role, profileMode: user.profileMode },
       env.JWT_SECRET,
       { expiresIn: env.JWT_EXPIRES_IN } as jwt.SignOptions,
     )
