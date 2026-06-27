@@ -34,6 +34,17 @@ enum DailyMissionType {
   QUIZ_CORRECT
 }
 
+enum GameType {
+  WORD_SEARCH
+  HANGMAN
+}
+
+enum GameDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
 model User {
   id               String                 @id @default(uuid())
   name             String
@@ -52,6 +63,7 @@ model User {
   moduleAccess     StudentModuleAccess[]
   badges           UserBadge[]
   dailyMissions    DailyMission[]
+  gameProgress     GameProgress[]
 
   @@map("users")
 }
@@ -118,6 +130,7 @@ model Progress {
   quizResults         Json?     @map("quiz_results")
   openQuestionAnswers Json?     @map("open_question_answers")
   checklistState      Json?     @map("checklist_state")
+  gameResults         Json?     @map("game_results")
   createdAt           DateTime  @default(now()) @map("created_at")
   user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson              Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
@@ -165,6 +178,36 @@ model DailyMission {
 
   @@unique([userId, date, type])
   @@map("daily_missions")
+}
+
+model Game {
+  id          String         @id @default(uuid())
+  title       String
+  description String?
+  type        GameType       @default(WORD_SEARCH)
+  difficulty  GameDifficulty @default(EASY)
+  config      Json
+  isActive    Boolean        @default(true) @map("is_active")
+  order       Int            @default(0)
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+  progress    GameProgress[]
+
+  @@map("games")
+}
+
+model GameProgress {
+  id          String    @id @default(uuid())
+  userId      String    @map("user_id")
+  gameId      String    @map("game_id")
+  completed   Boolean   @default(false)
+  completedAt DateTime? @map("completed_at")
+  stats       Json?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  game        Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId])
+  @@map("game_progress")
 }
 
 model PlatformConfig {

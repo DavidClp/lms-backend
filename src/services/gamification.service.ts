@@ -18,6 +18,7 @@ export const XP_REWARDS = {
   DAILY_QUIZ: 20,
   WEEKLY_LESSONS: 100,
   STREAK_3_BONUS: 25,
+  GAME_COMPLETE: 15,
 } as const
 
 export function calculateLevel(totalXp: number): number {

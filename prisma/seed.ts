@@ -1,5 +1,7 @@
 import { PrismaClient, Role, ProfileMode, ModuleAudience } from '@prisma/client'
 import bcrypt from 'bcryptjs'
+import { buildConfigFromInput } from '../src/services/word-search.service'
+import { buildHangmanConfig } from '../src/services/hangman.service'
 
 const prisma = new PrismaClient()
 
@@ -10,6 +12,8 @@ async function main() {
   await prisma.dailyMission.deleteMany()
   await prisma.userBadge.deleteMany()
   await prisma.badge.deleteMany()
+  await prisma.gameProgress.deleteMany()
+  await prisma.game.deleteMany()
   await prisma.progress.deleteMany()
   await prisma.lesson.deleteMany()
   await prisma.module.deleteMany()
@@ -377,6 +381,55 @@ async function main() {
 
   console.log('Progress records created')
 
+  const keyboardGameConfig = buildConfigFromInput({
+    words: ['ENTER', 'ESPACO', 'SHIFT', 'CTRL', 'ALT'],
+    difficulty: 'EASY',
+  })
+  const mouseGameConfig = buildConfigFromInput({
+    words: ['MOUSE', 'CLICAR', 'TELA', 'PONTEIRO'],
+    difficulty: 'EASY',
+  })
+
+  const keyboardGame = await prisma.game.create({
+    data: {
+      title: 'Caça-Palavras do Teclado',
+      description: 'Encontre palavras sobre o teclado do computador!',
+      difficulty: 'EASY',
+      order: 1,
+      config: keyboardGameConfig as object,
+    },
+  })
+
+  const mouseGame = await prisma.game.create({
+    data: {
+      title: 'Caça-Palavras do Mouse',
+      description: 'Encontre palavras sobre o mouse!',
+      difficulty: 'EASY',
+      order: 2,
+      config: mouseGameConfig as object,
+    },
+  })
+
+  const hangmanConfig = buildHangmanConfig({
+    secretWord: 'TECLADO',
+    hint: 'Tem muitas teclas e usamos para digitar',
+    category: 'Informática',
+    difficulty: 'EASY',
+  })
+
+  const hangmanGame = await prisma.game.create({
+    data: {
+      title: 'Forca: Peças do Computador',
+      description: 'Adivinhe palavras sobre o computador!',
+      type: 'HANGMAN',
+      difficulty: 'EASY',
+      order: 3,
+      config: hangmanConfig as object,
+    },
+  })
+
+  console.log('Kids games created')
+
   await prisma.lesson.createMany({
     data: [
       {
@@ -429,6 +482,11 @@ async function main() {
               },
             ],
           },
+          {
+            type: 'GAME',
+            gameId: keyboardGame.id,
+            title: 'Desafio: Caça-Palavras do Teclado',
+          },
         ],
       },
       {
@@ -455,6 +513,11 @@ async function main() {
                 correctOptionId: '1',
               },
             ],
+          },
+          {
+            type: 'GAME',
+            gameId: mouseGame.id,
+            title: 'Desafio: Caça-Palavras do Mouse',
           },
         ],
       },

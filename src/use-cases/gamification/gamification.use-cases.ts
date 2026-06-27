@@ -121,4 +121,10 @@ export class ProcessGamificationEventUseCase {
     if (!user || user.profileMode !== 'KIDS') return null
     return this.gamificationRepository.awardBadge(userId, 'helper')
   }
+
+  async onGameComplete(userId: string) {
+    const user = await this.userRepository.findById(userId)
+    if (!user || user.profileMode !== 'KIDS') return null
+    return this.gamificationRepository.addXp(userId, XP_REWARDS.GAME_COMPLETE)
+  }
 }

@@ -6,6 +6,8 @@ import {
   QuizResultsByBlock,
   OpenQuestionAnswersByBlock,
   ChecklistStateByBlock,
+  GameResultsByBlock,
+  GameResultItem,
 } from '../interfaces/IProgressRepository'
 
 type QuizResultItem = { questionId: string; correct: boolean }
@@ -58,6 +60,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       quizResults: getLatestQuizResults(r.quizResults) ?? undefined,
       openQuestionAnswers: (r.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
       checklistState: (r.checklistState as ChecklistStateByBlock) ?? undefined,
+      gameResults: (r.gameResults as unknown as GameResultsByBlock) ?? undefined,
       createdAt: r.createdAt,
       lesson: {
         id: r.lesson.id,
@@ -96,6 +99,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       quizResults: getLatestQuizResults(r.quizResults) ?? undefined,
       openQuestionAnswers: (r.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
       checklistState: (r.checklistState as ChecklistStateByBlock) ?? undefined,
+      gameResults: (r.gameResults as unknown as GameResultsByBlock) ?? undefined,
       createdAt: r.createdAt,
       user: r.user,
       lesson: {
@@ -122,6 +126,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
       checklistState: (record.checklistState as ChecklistStateByBlock) ?? undefined,
+      gameResults: (record.gameResults as unknown as GameResultsByBlock) ?? undefined,
     }
   }
 
@@ -152,6 +157,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
       checklistState: (record.checklistState as ChecklistStateByBlock) ?? undefined,
+      gameResults: (record.gameResults as unknown as GameResultsByBlock) ?? undefined,
     }
   }
 
@@ -180,6 +186,7 @@ export class PrismaProgressRepository implements IProgressRepository {
       quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
       checklistState: (record.checklistState as ChecklistStateByBlock) ?? undefined,
+      gameResults: (record.gameResults as unknown as GameResultsByBlock) ?? undefined,
     }
   }
 
@@ -208,6 +215,36 @@ export class PrismaProgressRepository implements IProgressRepository {
       quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
       openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
       checklistState: (record.checklistState as ChecklistStateByBlock) ?? undefined,
+      gameResults: (record.gameResults as unknown as GameResultsByBlock) ?? undefined,
+    }
+  }
+
+  async updateGameResult(
+    userId: string,
+    lessonId: string,
+    blockIndex: number,
+    result: GameResultItem,
+  ): Promise<ProgressData> {
+    const key = String(blockIndex)
+    const existing = await this.prisma.progress.findUnique({
+      where: { userId_lessonId: { userId, lessonId } },
+    })
+    const current = (existing?.gameResults as unknown as GameResultsByBlock) ?? {}
+    const next: GameResultsByBlock = { ...current, [key]: result }
+    const jsonValue = JSON.parse(JSON.stringify(next)) as Prisma.InputJsonValue
+
+    const record = await this.prisma.progress.upsert({
+      where: { userId_lessonId: { userId, lessonId } },
+      create: { userId, lessonId, completed: false, gameResults: jsonValue },
+      update: { gameResults: jsonValue },
+    })
+
+    return {
+      ...record,
+      quizResults: getLatestQuizResults(record.quizResults) ?? undefined,
+      openQuestionAnswers: (record.openQuestionAnswers as OpenQuestionAnswersByBlock) ?? undefined,
+      checklistState: (record.checklistState as ChecklistStateByBlock) ?? undefined,
+      gameResults: (record.gameResults as unknown as GameResultsByBlock) ?? undefined,
     }
   }
 }

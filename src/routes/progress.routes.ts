@@ -16,5 +16,6 @@ router.post('/', authenticate, progressController.toggleProgress)
 router.post('/quiz', authenticate, progressController.saveQuizResults)
 router.post('/open-question', authenticate, progressController.saveOpenQuestionAnswer)
 router.post('/checklist', authenticate, progressController.saveChecklistState)
+router.post('/game', authenticate, progressController.saveGameResult)
 
 export default router

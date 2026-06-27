@@ -4,6 +4,7 @@ import { ToggleProgressUseCase } from '../use-cases/progress/toggle-progress.use
 import { SaveQuizResultsUseCase } from '../use-cases/progress/save-quiz-results.use-case'
 import { SaveOpenQuestionAnswerUseCase } from '../use-cases/progress/save-open-question-answer.use-case'
 import { SaveChecklistStateUseCase } from '../use-cases/progress/save-checklist-state.use-case'
+import { SaveGameResultUseCase } from '../use-cases/progress/save-game-result.use-case'
 import { ProcessGamificationEventUseCase } from '../use-cases/gamification/gamification.use-cases'
 import { progressRepository, lessonRepository, gamificationRepository, userRepository } from '../repositories'
 import { AppError } from '../middlewares/error.middleware'
@@ -125,6 +126,21 @@ export const progressController = {
       }
 
       res.json({ ...progress, gamification })
+    } catch (e) {
+      next(e)
+    }
+  },
+
+  async saveGameResult(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      if (!req.user) {
+        throw new AppError('Não autenticado', 401)
+      }
+      const progress = await new SaveGameResultUseCase(progressRepository).execute(
+        req.user.id,
+        req.body,
+      )
+      res.json(progress)
     } catch (e) {
       next(e)
     }
