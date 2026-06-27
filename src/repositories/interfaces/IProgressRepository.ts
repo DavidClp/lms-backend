@@ -6,6 +6,15 @@ export type OpenQuestionAnswersByBlock = Record<string, string>
 /** Por bloco (índice): estado dos checkboxes */
 export type ChecklistStateByBlock = Record<string, boolean[]>
 
+/** Resultado de jogo por índice do bloco */
+export interface GameResultItem {
+  completed: boolean
+  timeMs?: number
+  foundWords: string[]
+}
+
+export type GameResultsByBlock = Record<string, GameResultItem>
+
 export interface ProgressData {
   id: string
   userId: string
@@ -15,6 +24,7 @@ export interface ProgressData {
   quizResults?: QuizResultsByBlock | null
   openQuestionAnswers?: OpenQuestionAnswersByBlock | null
   checklistState?: ChecklistStateByBlock | null
+  gameResults?: GameResultsByBlock | null
   createdAt: Date
 }
 
@@ -53,5 +63,11 @@ export interface IProgressRepository {
     lessonId: string,
     blockIndex: number,
     checked: boolean[]
+  ): Promise<ProgressData>
+  updateGameResult(
+    userId: string,
+    lessonId: string,
+    blockIndex: number,
+    result: GameResultItem
   ): Promise<ProgressData>
 }

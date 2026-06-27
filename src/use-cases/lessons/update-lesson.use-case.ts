@@ -68,6 +68,11 @@ const contentBlockSchema = z.discriminatedUnion('type', [
     src: z.string().min(1),
     title: z.string().optional(),
   }),
+  z.object({
+    type: z.literal('GAME'),
+    gameId: z.string().uuid(),
+    title: z.string().optional(),
+  }),
 ])
 
 const updateLessonSchema = z.object({
