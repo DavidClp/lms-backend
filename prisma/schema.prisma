@@ -7,76 +7,38 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Role {
-  ADMIN
-  STUDENT
-}
-
-enum ProfileMode {
-  ADULT
-  KIDS
-}
-
-enum ModuleAudience {
-  ADULT
-  KIDS
-  ALL
-}
-
-enum LessonKind {
-  LESSON
-  EXAM
-}
-
-enum DailyMissionType {
-  LOGIN
-  COMPLETE_LESSON
-  QUIZ_CORRECT
-}
-
-enum GameType {
-  WORD_SEARCH
-  HANGMAN
-}
-
-enum GameDifficulty {
-  EASY
-  MEDIUM
-  HARD
-}
-
 model User {
-  id               String                 @id @default(uuid())
+  id               String                @id @default(uuid())
   name             String
-  email            String                 @unique
+  email            String                @unique
   password         String
-  role             Role                   @default(STUDENT)
-  profileMode      ProfileMode            @default(ADULT) @map("profile_mode")
-  totalXp          Int                    @default(0) @map("total_xp")
-  level            Int                    @default(1)
-  avatarConfig     Json?                  @map("avatar_config")
-  currentStreak    Int                    @default(0) @map("current_streak")
-  lastActivityDate DateTime?              @map("last_activity_date")
-  createdAt        DateTime               @default(now()) @map("created_at")
-  updatedAt        DateTime               @updatedAt @map("updated_at")
+  role             Role                  @default(STUDENT)
+  createdAt        DateTime              @default(now()) @map("created_at")
+  updatedAt        DateTime              @updatedAt @map("updated_at")
+  avatarConfig     Json?                 @map("avatar_config")
+  currentStreak    Int                   @default(0) @map("current_streak")
+  lastActivityDate DateTime?             @map("last_activity_date")
+  level            Int                   @default(1)
+  profileMode      ProfileMode           @default(ADULT) @map("profile_mode")
+  totalXp          Int                   @default(0) @map("total_xp")
+  dailyMissions    DailyMission[]
+  gameProgress     GameProgress[]
   progress         Progress[]
   moduleAccess     StudentModuleAccess[]
   badges           UserBadge[]
-  dailyMissions    DailyMission[]
-  gameProgress     GameProgress[]
 
   @@map("users")
 }
 
 model Module {
-  id            String                 @id @default(uuid())
+  id            String                @id @default(uuid())
   title         String
   description   String?
-  order         Int                    @map("order")
-  audience      ModuleAudience         @default(ADULT)
-  kidsMeta      Json?                  @map("kids_meta")
-  createdAt     DateTime               @default(now()) @map("created_at")
-  updatedAt     DateTime               @updatedAt @map("updated_at")
+  order         Int                   @map("order")
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+  audience      ModuleAudience        @default(ADULT)
+  kidsMeta      Json?                 @map("kids_meta")
   lessons       Lesson[]
   studentAccess StudentModuleAccess[]
 
@@ -87,8 +49,8 @@ model StudentModuleAccess {
   id       String @id @default(uuid())
   userId   String @map("user_id")
   moduleId String @map("module_id")
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   module   Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, moduleId])
   @@map("student_module_access")
@@ -99,11 +61,11 @@ model Lesson {
   moduleId  String     @map("module_id")
   title     String
   order     Int        @map("order")
-  kind      LessonKind @default(LESSON) @map("kind")
   content   Json       @default("[]")
-  isActive  Boolean    @default(true) @map("is_active")
   createdAt DateTime   @default(now()) @map("created_at")
   updatedAt DateTime   @updatedAt @map("updated_at")
+  isActive  Boolean    @default(true) @map("is_active")
+  kind      LessonKind @default(LESSON) @map("kind")
   module    Module     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   progress  Progress[]
 
@@ -127,13 +89,13 @@ model Progress {
   lessonId            String    @map("lesson_id")
   completed           Boolean   @default(false)
   completedAt         DateTime? @map("completed_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
   quizResults         Json?     @map("quiz_results")
   openQuestionAnswers Json?     @map("open_question_answers")
   checklistState      Json?     @map("checklist_state")
   gameResults         Json?     @map("game_results")
-  createdAt           DateTime  @default(now()) @map("created_at")
-  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson              Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, lessonId])
   @@map("progress")
@@ -157,8 +119,8 @@ model UserBadge {
   userId   String   @map("user_id")
   badgeId  String   @map("badge_id")
   earnedAt DateTime @default(now()) @map("earned_at")
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, badgeId])
   @@map("user_badges")
@@ -203,8 +165,8 @@ model GameProgress {
   completed   Boolean   @default(false)
   completedAt DateTime? @map("completed_at")
   stats       Json?
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   game        Game      @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, gameId])
   @@map("game_progress")
@@ -227,4 +189,65 @@ model casamento_confirmacao {
   observacao         String?  @map("observacoes")
 
   @@map("casamento_confirmacao")
+}
+
+model media {
+  id           String    @id @db.Uuid
+  guest        String
+  src          String
+  type         MediaType
+  created_at   DateTime  @default(now())
+  display_key  String?
+  local_ok     Boolean   @default(false)
+  original_key String?
+  poster       String?
+  poster_key   String?
+  r2_ok        Boolean   @default(true)
+  src_original String?
+
+  @@index([created_at(sort: Desc), id(sort: Desc)])
+  @@index([type, created_at(sort: Desc)])
+}
+
+enum Role {
+  ADMIN
+  STUDENT
+}
+
+enum ProfileMode {
+  ADULT
+  KIDS
+}
+
+enum ModuleAudience {
+  ADULT
+  KIDS
+  ALL
+}
+
+enum LessonKind {
+  LESSON
+  EXAM
+}
+
+enum DailyMissionType {
+  LOGIN
+  COMPLETE_LESSON
+  QUIZ_CORRECT
+}
+
+enum GameType {
+  WORD_SEARCH
+  HANGMAN
+}
+
+enum GameDifficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum MediaType {
+  photo
+  video
 }
