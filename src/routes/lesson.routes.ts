@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { lessonController } from '../controllers/lesson.controller'
+import { lessonController, lessonDocxUpload } from '../controllers/lesson.controller'
 import { authenticate } from '../middlewares/auth.middleware'
 import { requireRole } from '../middlewares/role.middleware'
 
@@ -10,6 +10,7 @@ router.get('/:id/quiz-results', authenticate, requireRole('ADMIN'), lessonContro
 router.get('/:id', authenticate, lessonController.getById)
 router.post('/', authenticate, requireRole('ADMIN'), lessonController.create)
 router.post('/import', authenticate, requireRole('ADMIN'), lessonController.importFromMarkdown)
+router.post('/import-docx', authenticate, requireRole('ADMIN'), lessonDocxUpload, lessonController.importFromDocx)
 router.put('/:id', authenticate, requireRole('ADMIN'), lessonController.update)
 router.delete('/:id', authenticate, requireRole('ADMIN'), lessonController.delete)
 

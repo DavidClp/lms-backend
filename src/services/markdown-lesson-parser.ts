@@ -170,7 +170,7 @@ function parseQuizBlock(body: string): QuizBlock['questions'] {
       const isCorrect = bulletMatch[1] === '(●)'
       const rawText = bulletMatch[2].trim()
       const text = rawText.replace(/\*\*|\s*✓\s*$/g, '').trim()
-      const id = `opt-${qIndex}-${optIndex}`
+      const id = String.fromCharCode(97 + optIndex)
       options.push({ id, text })
       if (isCorrect) correctOptionId = id
       optIndex++

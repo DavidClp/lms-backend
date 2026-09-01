@@ -6,6 +6,7 @@ export class DeleteModuleUseCase {
 
   async execute(id: string): Promise<void> {
     const existing = await this.moduleRepository.findById(id)
+    console.log("existing", existing)
     if (!existing) throw new AppError('Módulo não encontrado', 404)
     await this.moduleRepository.delete(id)
   }
