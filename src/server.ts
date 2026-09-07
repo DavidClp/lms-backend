@@ -11,7 +11,7 @@ app.use(cors())
 
 app.use(express.json())
 
-app.use('/api', router)
+app.use('/', router)
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })
@@ -20,7 +20,7 @@ app.get('/health', (_req, res) => {
 app.use(errorHandler)
 
 app.listen(env.PORT, () => {
-  console.log(`Server running at http://localhost:${env.PORT}/api`)
+  console.log(`Server running at http://localhost:${env.PORT}`)
 })
 
 export default app
